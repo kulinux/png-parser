@@ -5,7 +5,6 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import org.scalatest.prop.Checkers
 import org.scalacheck.Arbitrary._
-import org.scalacheck.Prop._
 
 class PngReaderSpec extends FlatSpec
   with PropertyChecks
@@ -23,9 +22,8 @@ class PngReaderSpec extends FlatSpec
       whenever( take > 0 ) {
         val Data: Seq[Int] = List.fill(10000){5}.toSeq
 
-        val pngReader = new PngReader(data = Data)
         val takeData = Data.take(take)
-        val afterRead = pngReader.take(takeData).data
+        val afterRead = PngReader.take(Data, takeData)
         val toCheck : Seq[Int] = (takeData ++ afterRead)
 
         toCheck should be (Data)
