@@ -1,37 +1,41 @@
 package com.pako.png
 
+import com.pako.png.ChunkTypes.ChunkType
+
 
 case class PngFile(chunks: Seq[Chunk]) {
 }
 
 
 object ChunkTypes {
-  sealed class ChunkType
+  sealed trait ChunkType
+  case object MyChunkType extends ChunkType
 }
 
 object Chunk {
-  def getLength  = skip(4) andThen PngReader.getBytes(4) andThen PngReader.getInt
-  def getChunkType  = PngReader.getBytes(4) andThen getChunkTypeFromBytes
-  def getData(length: Int, data: Seq[Int]) = ???
-  def getCrc(length: Int, data: Seq[Int]) = ???
+  def getLength  = skip(8)_ andThen PngReader.getBytes(4) andThen PngReader.getInt
+  def getChunkType  = skip(12)_ andThen PngReader.getBytes(4) _ andThen getChunkTypeFromBytes
 
-  def getChunkTypeFromBytes = ???
+  def getData(length: Int) = skip(16)_ andThen PngReader.getBytes(length)
+  def getCrc(length: Int) = skip(16)_ andThen skip(length) andThen PngReader.getBytes(4)
 
-  def skip(i: Int)(data: Seq[Int]) = ???
+  def getChunkTypeFromBytes(d: Seq[Int]): ChunkTypes.ChunkType = ChunkTypes.MyChunkType
 
-
+  def skip(i: Int)(data: Seq[Int]): Seq[Int] = {
+    assert(i < data.length)
+    data.slice(i, data.length - 1)
+  }
 
   def getChunk(data: Seq[Int]) = {
     val length = getLength(data)
     val ct = getChunkType(data)
-    val dat = getData(length, data)
-    val crc = getCrc(length, data)
+    val dat = getData(length)(data)
+    val crc = getCrc(length)(data)
     Chunk(
       length,
       ct,
       dat,
       crc
-
     )
   }
 }
@@ -39,8 +43,8 @@ object Chunk {
 case class Chunk(
                   length: Int,
                   chunkType: ChunkTypes.ChunkType,
-                  data: Stream[Byte],
-                  crc: Array[Byte]
+                  data: Seq[Int],
+                  crc: Seq[Int]
                 )
 
 object PngReader {
@@ -57,7 +61,16 @@ object PngReader {
   }
 
   def getBytes(n: Int)(data: Seq[Int]) = data.slice(0, n)
-  def getInt(data: Seq[Int]): Int = ???
+
+  def getInt(d: Seq[Int]): Int = {
+    assert(d.length == 4)
+    var res = 0
+    res += d(0) << 24
+    res += d(1) << 16
+    res += d(2) << 8
+    res += d(3)
+    res
+  }
 
 
 }
@@ -67,6 +80,8 @@ object PngParser {
   def read(file: Seq[Int]) = {
     val pngReader =
       PngReader.skipHeader(file)
+
+    val ch = Chunk.getChunk( pngReader )
 
     println( pngReader )
   }

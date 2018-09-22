@@ -6,6 +6,18 @@ import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.prop.Checkers
 import org.scalacheck.Arbitrary._
 
+
+class PngReader2Spec extends FlatSpec
+  with Checkers
+  with Matchers {
+
+  "PngRead.getInt" should "readInt" in {
+    PngReader.getInt( Seq(0x00, 0x00, 0x00, 0xFF) ) should equal(255)
+    PngReader.getInt( Seq(0x00, 0x00, 0x00, 0x01) ) should equal(1)
+  }
+
+}
+
 class PngReaderSpec extends FlatSpec
   with PropertyChecks
   with Checkers
@@ -30,8 +42,10 @@ class PngReaderSpec extends FlatSpec
 
       }
     }
-
   }
+
+
+
 }
 
 
