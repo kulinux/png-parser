@@ -13,7 +13,8 @@ class PngReader2Spec extends FlatSpec
 
   "PngRead.getInt" should "readInt" in {
     PngReader.getInt( Seq(0x00, 0x00, 0x00, 0xFF) ) should equal(255)
-    PngReader.getInt( Seq(0x00, 0x00, 0x00, 0x01) ) should equal(1)
+    PngReader.getInt( Seq(0, 0, 0, 13) ) should equal(13)
+    PngReader.getInt( Seq(0, 0, 3, -105) ) should equal(919)
   }
 
 }
