@@ -1,11 +1,6 @@
 package com.pako.png
 
 
-
-case class PngFile(chunks: Seq[Chunk]) {
-}
-
-
 object ChunkTypes {
   case class ChunkType(d: Seq[Int]) {
     assert(d.length == 4)
@@ -13,12 +8,22 @@ object ChunkTypes {
   }
 }
 
-object Chunk {
-  def getLength  = PngReader.getBytes(4)_ andThen PngReader.getInt
-  def getChunkType  = skip(4)_ andThen PngReader.getBytes(4) _ andThen getChunkTypeFromBytes
+case class Chunk(
+                  length: Int,
+                  chunkType: ChunkTypes.ChunkType,
+                  data: Seq[Int],
+                  crc: Seq[Int]
+                ) {
+  def size = 4 + 4 + length + 4
+}
 
-  def getData(length: Int) = skip(8)_ andThen PngReader.getBytes(length)
-  def getCrc(length: Int) = skip(8)_ andThen skip(length) andThen PngReader.getBytes(4)
+
+object Chunk {
+  def getLength  = ByteUtils.getBytes(4)_ andThen ByteUtils.getInt
+  def getChunkType  = skip(4)_ andThen ByteUtils.getBytes(4) _ andThen getChunkTypeFromBytes
+
+  def getData(length: Int) = skip(8)_ andThen ByteUtils.getBytes(length)
+  def getCrc(length: Int) = skip(8)_ andThen skip(length) andThen ByteUtils.getBytes(4)
 
   def getChunkTypeFromBytes(d: Seq[Int]): ChunkTypes.ChunkType = new ChunkTypes.ChunkType(d)
 
@@ -42,16 +47,8 @@ object Chunk {
   }
 }
 
-case class Chunk(
-                  length: Int,
-                  chunkType: ChunkTypes.ChunkType,
-                  data: Seq[Int],
-                  crc: Seq[Int]
-                ) {
-  def size = 4 + 4 + length + 4
-}
 
-object PngReader {
+object ByteUtils {
   val MagicNumber = Seq(-119, 80, 78, 71, 13, 10, 26, 10)
 
   def take(data: Seq[Int], slice: Seq[Int]): Seq[Int] = {
@@ -61,7 +58,7 @@ object PngReader {
     data.slice(slice.length, data.length)
   }
   def skipHeader(data: Seq[Int]) : Seq[Int] = {
-    take( data, PngReader.MagicNumber )
+    take( data, ByteUtils.MagicNumber )
   }
 
   def getBytes(n: Int)(data: Seq[Int]) = data.slice(0, n)
@@ -81,7 +78,7 @@ object PngReader {
 }
 
 
-object PngParser {
+object ChunkReader {
 
   def getChunk(from: Int, data: Seq[Int]) =  {
       Chunk.getChunk(data)
@@ -96,7 +93,7 @@ object PngParser {
 
   def read(file: Seq[Int]) = {
     val data =
-      PngReader.skipHeader(file)
+      ByteUtils.skipHeader(file)
 
     val chs = getAllChunks(data)
 
@@ -105,9 +102,5 @@ object PngParser {
     chs.foreach(ch => println("Type: " + ch.chunkType.ascii()))
 
   }
-
-}
-
-class PngParser {
 
 }
