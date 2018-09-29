@@ -32,16 +32,24 @@ class ByteUtilsSpec extends FlatSpec
 
 }
 
-
-class ChunkReaderSpec extends FlatSpec with Matchers {
-  "ChunkReader" should "read file" in {
+object TestReaderUtils {
+  def readSample() = {
     val is = getClass.getResourceAsStream("/pnggrad8rgb.png" )
     val b = new Array[Byte](is.available())
     is.read(b)
-    val r = b.map(_.toInt)
-
-    ChunkReader.read( r )
+    val data = b.map(_.toInt)
     is.close()
+    data
+  }
+
+  def readSampleChunks() = ChunkReader.getAllChunks(readSample())
+
+}
+
+
+class ChunkReaderSpec extends FlatSpec with Matchers {
+  "ChunkReader" should "read file" in {
+    ChunkReader.read( TestReaderUtils.readSample() )
   }
 
 }

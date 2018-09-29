@@ -20,17 +20,12 @@ case class Chunk(
 
 object Chunk {
   def getLength  = ByteUtils.getBytes(4)_ andThen ByteUtils.getInt
-  def getChunkType  = skip(4)_ andThen ByteUtils.getBytes(4) _ andThen getChunkTypeFromBytes
+  def getChunkType  = ByteUtils.skip(4)_ andThen ByteUtils.getBytes(4) _ andThen getChunkTypeFromBytes
 
-  def getData(length: Int) = skip(8)_ andThen ByteUtils.getBytes(length)
-  def getCrc(length: Int) = skip(8)_ andThen skip(length) andThen ByteUtils.getBytes(4)
+  def getData(length: Int) = ByteUtils.skip(8)_ andThen ByteUtils.getBytes(length)
+  def getCrc(length: Int) = ByteUtils.skip(8)_ andThen ByteUtils.skip(length) andThen ByteUtils.getBytes(4)
 
   def getChunkTypeFromBytes(d: Seq[Int]): ChunkTypes.ChunkType = new ChunkTypes.ChunkType(d)
-
-  def skip(i: Int)(data: Seq[Int]): Seq[Int] = {
-    assert(i < data.length)
-    data.slice(i, data.length - 1)
-  }
 
   def getChunk(data: Seq[Int]): Option[Chunk] = {
     if(data.length == 0) return None
@@ -63,6 +58,13 @@ object ByteUtils {
 
   def getBytes(n: Int)(data: Seq[Int]) = data.slice(0, n)
 
+  def getByte(d: Seq[Int]): Int  = {
+    assert(d.length > 0)
+    getBytes(1)(d)(0)
+  }
+
+  def getNextInt = getBytes(4)_ andThen getInt
+
   def getInt(d: Seq[Int]): Int = {
     assert(d.length == 4)
     val b : Seq[Byte] = d.map(_.toByte)
@@ -74,7 +76,10 @@ object ByteUtils {
     res
   }
 
-
+  def skip(i: Int)(data: Seq[Int]): Seq[Int] = {
+    assert(i < data.length)
+    data.slice(i, data.length)
+  }
 }
 
 
@@ -87,7 +92,8 @@ object ChunkReader {
   def getAllChunks(data: Seq[Int]): Seq[Chunk] = {
     getChunk(0, data) match {
       case None => Nil
-      case Some(ch) => ch +: getAllChunks(data.slice(ch.size, data.length - 1))
+      case Some(ch) =>
+        ch +: getAllChunks(data.slice(ch.size, data.length - 1))
     }
   }
 
@@ -96,10 +102,10 @@ object ChunkReader {
       ByteUtils.skipHeader(file)
 
     val chs = getAllChunks(data)
-
     println( s"I have parsed ${chs.length} chunks")
-
     chs.foreach(ch => println("Type: " + ch.chunkType.ascii()))
+
+    chs
 
   }
 
