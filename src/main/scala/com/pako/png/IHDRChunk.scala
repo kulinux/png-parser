@@ -12,7 +12,9 @@ case class IHDRChunk
   compMeth: Int,
   filterMeth: Int,
   interlace: Int
-) extends HLChunk
+) extends HLChunk {
+  val ct = "IHDR"
+}
 
 
 object IHDRChunk {

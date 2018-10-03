@@ -13,6 +13,8 @@ class PNGReaderSpec
     val hls = data
       .map(ch => HLChunk(ch) )
 
+    val png = new PNGFile(hls)
+
     println(hls)
 
   }

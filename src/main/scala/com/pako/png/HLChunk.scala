@@ -1,9 +1,13 @@
 package com.pako.png
 
-trait HLChunk
+trait HLChunk {
+  val ct: String
+}
 
 case class UnknownChunk(ch: Chunk)
-  extends HLChunk
+  extends HLChunk {
+  val ct = ch.chunkType.ascii()
+}
 
 object HLChunk {
   def apply(ch: Chunk): HLChunk =  {

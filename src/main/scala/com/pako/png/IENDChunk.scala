@@ -1,7 +1,9 @@
 package com.pako.png
 
 case class IENDChunk ()
-  extends HLChunk
+  extends HLChunk {
+  val ct = "IEND"
+}
 
 object IENDChunk {
 

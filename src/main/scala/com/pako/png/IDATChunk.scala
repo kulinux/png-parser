@@ -3,7 +3,9 @@ package com.pako.png
 case class IDATChunk
 (
   data: Seq[Int]
-) extends HLChunk
+) extends HLChunk {
+  val ct = "IDAT"
+}
 
 object IDATChunk {
   def read(ch: Chunk) : IDATChunk = {
