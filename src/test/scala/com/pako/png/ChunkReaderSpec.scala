@@ -1,8 +1,8 @@
 package com.pako.png
 
+import com.pako.png.util.TestUtils
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpec, Matchers}
-
 import org.scalatest.prop.Checkers
 import org.scalacheck.Arbitrary._
 
@@ -34,12 +34,7 @@ class ByteUtilsSpec extends FlatSpec
 
 object TestReaderUtils {
   def readSample() = {
-    val is = getClass.getResourceAsStream("/pnggrad8rgb.png" )
-    val b = new Array[Byte](is.available())
-    is.read(b)
-    val data = b.map(_.toInt)
-    is.close()
-    data
+    TestUtils.readFromRsc( "/pnggrad8rgb.png" )
   }
 
   def readSampleChunks() = ChunkReader.getAllChunks(readSample())

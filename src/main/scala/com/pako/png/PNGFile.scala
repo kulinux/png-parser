@@ -1,6 +1,7 @@
 package com.pako.png
 
 object PNGFile {
+
   sealed trait PNGChunkType
   case object IDAT extends PNGChunkType
   case object IHDR extends PNGChunkType
@@ -18,6 +19,7 @@ object PNGFile {
 }
 
 class PNGFile (chs: Seq[HLChunk]){
+
 
   val chunks: Map[PNGFile.PNGChunkType, HLChunk] =
     chs.map(ch => PNGFile.translate(ch.ct) -> ch)
