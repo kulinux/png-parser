@@ -11,6 +11,7 @@ lazy val root = (project in file(".")).
     name := "PNG Parser",
     libraryDependencies ++= Seq(
       scalaTest % Test,
-      scalaCheck % Test
+      scalaCheck % Test,
+      scalaFx
     )
   )

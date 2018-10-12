@@ -9,11 +9,20 @@ class PNGReaderSpec
   with Matchers {
 
   "PNG" should "parse" in {
+    val content = PngReaderUtil.readPngContent
+    println("end")
+
+  }
+}
+
+object PngReaderUtil {
+
+  def readPngContent = {
     val data =
-      ChunkReader.read( TestReaderUtils.readSample() )
+      ChunkReader.read(TestReaderUtils.readSample())
 
     val hls = data
-      .map(ch => HLChunk(ch) )
+      .map(ch => HLChunk(ch))
 
     val png = new PNGFile(hls)
 
@@ -23,16 +32,14 @@ class PNGReaderSpec
 
     val imgComp = dataChunk
       .data
-        .map(_.toByte).toArray
+      .map(_.toByte).toArray
 
     val img = Zip.decompress(imgComp)
 
-    TrueColourImage.parse(img,
+    val rgb = TrueColourImage.parse(img,
       ihdrChunk.width,
       ihdrChunk.heigth)
 
-    println(hls)
-
+    rgb
   }
-
 }
